@@ -1,0 +1,38 @@
+export type FileType = 'FASTQ' | 'JPG' | 'CSV' | 'XLSX' | 'PARQUET';
+
+export interface FileTypeMetadata {
+  id: FileType;
+  name: string;
+  extension: string;
+  description: string;
+  useCase: string;
+  structure: string;
+  sampleCode: string;
+  icon: string;
+  color: string;
+}
+
+export interface BenchmarkResult {
+  id: string;
+  fileType: FileType;
+  fileName: string;
+  fileSize: number;
+  sparkExecutionTime: number;
+  pandasExecutionTime: number;
+  sparkThroughput: number;
+  pandasThroughput: number;
+  timestamp: Date;
+  status: 'pending' | 'processing' | 'completed' | 'error';
+  errorMessage?: string;
+}
+
+export interface BenchmarkRequest {
+  fileType: FileType;
+  file: File;
+}
+
+export interface ProcessingStatus {
+  stage: 'uploading' | 'processing_spark' | 'processing_pandas' | 'completed' | 'error';
+  progress: number;
+  message: string;
+}

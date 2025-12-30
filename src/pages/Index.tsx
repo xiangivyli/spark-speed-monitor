@@ -1,13 +1,138 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import Header from '@/components/Header';
+import FileTypeCard from '@/components/FileTypeCard';
+import BenchmarkResults from '@/components/BenchmarkResults';
+import ProcessingStatus from '@/components/ProcessingStatus';
+import { fileTypesData } from '@/data/fileTypes';
+import { useBenchmark } from '@/hooks/useBenchmark';
+import { FileType } from '@/types/benchmark';
+import { Zap, Server, Activity } from 'lucide-react';
 
 const Index = () => {
+  const [selectedFileType, setSelectedFileType] = useState<FileType | null>(null);
+  const { results, processingStatus, isProcessing, submitBenchmark } = useBenchmark();
+
+  const handleFileSelect = (fileType: FileType) => (file: File) => {
+    setSelectedFileType(fileType);
+    submitBenchmark(file, fileType);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <>
+      <Helmet>
+        <title>SparkBench - Healthcare Data Performance Benchmarking</title>
+        <meta name="description" content="Compare Apache Spark and Pandas execution times for healthcare data processing. Benchmark FASTQ, JPEG, CSV, XLSX, and Parquet files." />
+      </Helmet>
+
+      <div className="min-h-screen">
+        <Header />
+        
+        <main className="container mx-auto px-4 py-8">
+          {/* Hero Section */}
+          <section className="text-center mb-12 animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <Activity className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Healthcare Data Benchmark Tool</span>
+            </div>
+            
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+              Compare <span className="gradient-text">Spark</span> vs <span className="gradient-text">Pandas</span>
+            </h1>
+            
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              Upload your healthcare data files and get real-time performance comparisons 
+              between Apache Spark and Pandas processing frameworks.
+            </p>
+
+            {/* Stats/Features Row */}
+            <div className="flex flex-wrap justify-center gap-6 mb-8">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border">
+                <Zap className="w-4 h-4 text-primary" />
+                <span className="text-sm text-foreground">Apache Spark 3.x</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border">
+                <span className="text-lg">🐼</span>
+                <span className="text-sm text-foreground">Pandas 2.x</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border">
+                <Server className="w-4 h-4 text-accent" />
+                <span className="text-sm text-foreground">5 File Types</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Processing Status */}
+          {processingStatus && (
+            <section className="mb-8 animate-scale-in">
+              <ProcessingStatus status={processingStatus} />
+            </section>
+          )}
+
+          {/* Results Section */}
+          {results.length > 0 && (
+            <section className="mb-12 animate-slide-up">
+              <BenchmarkResults results={results} />
+            </section>
+          )}
+
+          {/* File Type Selection Grid */}
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-semibold text-foreground">Select File Type</h2>
+                <p className="text-muted-foreground">Choose a format and upload your file to benchmark</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {fileTypesData.map((fileType, index) => (
+                <div 
+                  key={fileType.id} 
+                  className="animate-slide-up"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <FileTypeCard
+                    fileType={fileType}
+                    onFileSelect={handleFileSelect(fileType.id)}
+                    isSelected={selectedFileType === fileType.id && isProcessing}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* API Integration Notice */}
+          <section className="mt-12 p-6 rounded-2xl bg-secondary/30 border border-border">
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-xl bg-accent/10">
+                <Server className="w-6 h-6 text-accent" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground mb-2">API-Ready Architecture</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  This frontend is designed to connect to your external processing server. 
+                  Set the <code className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">VITE_BENCHMARK_API_URL</code> environment 
+                  variable to point to your Spark/Pandas processing endpoint.
+                </p>
+                <div className="p-3 rounded-lg bg-card border border-border font-mono text-xs text-muted-foreground">
+                  POST /api/benchmark - Expected response: {`{ sparkExecutionTime, pandasExecutionTime, sparkThroughput, pandasThroughput }`}
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-border/50 mt-16 py-8">
+          <div className="container mx-auto px-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              SparkBench - Healthcare Data Performance Benchmarking Tool
+            </p>
+          </div>
+        </footer>
       </div>
-    </div>
+    </>
   );
 };
 

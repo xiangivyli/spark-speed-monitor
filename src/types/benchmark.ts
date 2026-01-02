@@ -12,6 +12,25 @@ export interface FileTypeMetadata {
   color: string;
 }
 
+export interface SparkJobInfo {
+  jobId?: number;
+  stageCount?: number;
+  taskCount?: number;
+  executorCount?: number;
+  sparkVersion?: string;
+}
+
+export interface ProcessingResult {
+  rows?: number;
+  columns?: number;
+  records?: number;
+  lines?: number;
+  width?: number;
+  height?: number;
+  mode?: string;
+  schema?: string[];
+}
+
 export interface BenchmarkResult {
   id: string;
   fileType: FileType;
@@ -24,6 +43,10 @@ export interface BenchmarkResult {
   timestamp: Date;
   status: 'pending' | 'processing' | 'completed' | 'error';
   errorMessage?: string;
+  dataSource: 'server' | 'simulated';
+  sparkResult?: ProcessingResult;
+  pandasResult?: ProcessingResult;
+  sparkJobInfo?: SparkJobInfo;
 }
 
 export interface BenchmarkRequest {

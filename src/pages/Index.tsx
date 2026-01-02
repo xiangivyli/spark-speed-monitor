@@ -101,26 +101,6 @@ const Index = () => {
               ))}
             </div>
           </section>
-
-          {/* API Integration Notice */}
-          <section className="mt-12 p-6 rounded-2xl bg-secondary/30 border border-border">
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl bg-accent/10">
-                <Server className="w-6 h-6 text-accent" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground mb-2">API-Ready Architecture</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  This frontend is designed to connect to your external processing server. 
-                  Set the <code className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">VITE_BENCHMARK_API_URL</code> environment 
-                  variable to point to your Spark/Pandas processing endpoint.
-                </p>
-                <div className="p-3 rounded-lg bg-card border border-border font-mono text-xs text-muted-foreground">
-                  POST /api/benchmark - Expected response: {`{ sparkExecutionTime, pandasExecutionTime, sparkThroughput, pandasThroughput }`}
-                </div>
-              </div>
-            </div>
-          </section>
         </main>
 
         {/* Footer */}

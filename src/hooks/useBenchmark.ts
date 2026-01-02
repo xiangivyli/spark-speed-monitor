@@ -28,6 +28,7 @@ export const useBenchmark = () => {
       pandasThroughput: 0,
       timestamp: new Date(),
       status: 'pending',
+      dataSource: 'server',
     };
     
     setResults(prev => [pendingResult, ...prev]);
@@ -90,10 +91,14 @@ export const useBenchmark = () => {
           ? {
               ...r,
               status: 'completed' as const,
+              dataSource: 'server' as const,
               sparkExecutionTime: data.sparkExecutionTime,
               pandasExecutionTime: data.pandasExecutionTime,
               sparkThroughput: data.sparkThroughput,
               pandasThroughput: data.pandasThroughput,
+              sparkResult: data.sparkResult,
+              pandasResult: data.pandasResult,
+              sparkJobInfo: data.sparkJobInfo,
             }
           : r
       ));
@@ -116,6 +121,7 @@ export const useBenchmark = () => {
           ? {
               ...r,
               status: 'completed' as const,
+              dataSource: 'simulated' as const,
               sparkExecutionTime: simulatedSparkTime,
               pandasExecutionTime: simulatedPandasTime,
               sparkThroughput: fileSizeMB / (simulatedSparkTime / 1000),

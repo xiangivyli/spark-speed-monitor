@@ -7,7 +7,11 @@ import {
   TrendingUp,
   CheckCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  Server,
+  Cpu,
+  Layers,
+  Database
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -60,7 +64,7 @@ const BenchmarkResults = ({ results }: BenchmarkResultsProps) => {
           <Card key={result.id} className="card-elevated overflow-hidden">
             <div className="p-6">
               {/* Header */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className={cn(
                     "p-2 rounded-lg",
@@ -86,16 +90,105 @@ const BenchmarkResults = ({ results }: BenchmarkResultsProps) => {
                   </div>
                 </div>
                 
-                {result.status === 'completed' && (
-                  <div className={cn(
-                    "px-3 py-1.5 rounded-full text-sm font-medium",
-                    sparkFaster ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent"
-                  )}>
-                    <Zap className="w-3 h-3 inline mr-1" />
-                    {sparkFaster ? `Spark ${speedup.toFixed(1)}x faster` : `Pandas ${(1/speedup).toFixed(1)}x faster`}
-                  </div>
-                )}
+                <div className="flex items-center gap-2 flex-wrap justify-end">
+                  {result.status === 'completed' && (
+                    <>
+                      {/* Data Source Indicator */}
+                      <div className={cn(
+                        "px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1.5",
+                        result.dataSource === 'server' 
+                          ? "bg-success/10 text-success border border-success/20" 
+                          : "bg-warning/10 text-warning border border-warning/20"
+                      )}>
+                        <Server className="w-3 h-3" />
+                        {result.dataSource === 'server' ? 'Live Server' : 'Simulated'}
+                      </div>
+                      
+                      {/* Speed Comparison */}
+                      <div className={cn(
+                        "px-3 py-1.5 rounded-full text-sm font-medium",
+                        sparkFaster ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent"
+                      )}>
+                        <Zap className="w-3 h-3 inline mr-1" />
+                        {sparkFaster ? `Spark ${speedup.toFixed(1)}x faster` : `Pandas ${(1/speedup).toFixed(1)}x faster`}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
+
+              {/* Spark Job Info - Only show when from real server */}
+              {result.status === 'completed' && result.dataSource === 'server' && result.sparkJobInfo && (
+                <div className="mb-4 p-3 rounded-xl bg-secondary/50 border border-border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Cpu className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium text-foreground">Spark Job Details</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    {result.sparkJobInfo.sparkVersion && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-muted-foreground">Version:</span>
+                        <span className="font-mono text-foreground">{result.sparkJobInfo.sparkVersion}</span>
+                      </div>
+                    )}
+                    {result.sparkJobInfo.stageCount !== undefined && (
+                      <div className="flex items-center gap-1.5">
+                        <Layers className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-muted-foreground">Stages:</span>
+                        <span className="font-mono text-foreground">{result.sparkJobInfo.stageCount}</span>
+                      </div>
+                    )}
+                    {result.sparkJobInfo.taskCount !== undefined && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-muted-foreground">Tasks:</span>
+                        <span className="font-mono text-foreground">{result.sparkJobInfo.taskCount}</span>
+                      </div>
+                    )}
+                    {result.sparkJobInfo.executorCount !== undefined && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-muted-foreground">Executors:</span>
+                        <span className="font-mono text-foreground">{result.sparkJobInfo.executorCount}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Processing Results - Show row/record counts */}
+              {result.status === 'completed' && result.sparkResult && (
+                <div className="mb-4 p-3 rounded-xl bg-muted/30 border border-border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Database className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">Processing Summary</span>
+                  </div>
+                  <div className="flex flex-wrap gap-4 text-xs">
+                    {result.sparkResult.rows !== undefined && (
+                      <div>
+                        <span className="text-muted-foreground">Rows: </span>
+                        <span className="font-mono text-foreground">{result.sparkResult.rows.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {result.sparkResult.columns !== undefined && (
+                      <div>
+                        <span className="text-muted-foreground">Columns: </span>
+                        <span className="font-mono text-foreground">{result.sparkResult.columns}</span>
+                      </div>
+                    )}
+                    {result.sparkResult.records !== undefined && (
+                      <div>
+                        <span className="text-muted-foreground">Records: </span>
+                        <span className="font-mono text-foreground">{result.sparkResult.records.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {result.sparkResult.width !== undefined && result.sparkResult.height !== undefined && (
+                      <div>
+                        <span className="text-muted-foreground">Dimensions: </span>
+                        <span className="font-mono text-foreground">{result.sparkResult.width}×{result.sparkResult.height}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {result.status === 'completed' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

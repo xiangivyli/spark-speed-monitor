@@ -1,5 +1,10 @@
 export type FileType = 'FASTQ' | 'JPG' | 'CSV' | 'XLSX' | 'PARQUET';
 
+export interface SparkConfig {
+  threads: number;
+  driverMemory: string;
+}
+
 export interface FileTypeMetadata {
   id: FileType;
   name: string;
@@ -47,6 +52,7 @@ export interface BenchmarkResult {
   sparkResult?: ProcessingResult;
   pandasResult?: ProcessingResult;
   sparkJobInfo?: SparkJobInfo;
+  sparkConfig?: SparkConfig;
 }
 
 export interface BenchmarkRequest {

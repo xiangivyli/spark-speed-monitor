@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { BenchmarkResult, FileType, ProcessingStatus } from '@/types/benchmark';
+import { BenchmarkResult, FileType, ProcessingStatus, SparkConfig } from '@/types/benchmark';
 import { useToast } from '@/hooks/use-toast';
 
 // API endpoint that you would configure to point to your external Spark/Pandas processing server
@@ -11,7 +11,7 @@ export const useBenchmark = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
-  const submitBenchmark = useCallback(async (file: File, fileType: FileType) => {
+  const submitBenchmark = useCallback(async (file: File, fileType: FileType, sparkConfig: SparkConfig) => {
     setIsProcessing(true);
     
     const benchmarkId = `benchmark-${Date.now()}`;
@@ -44,6 +44,8 @@ export const useBenchmark = () => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('fileType', fileType);
+      formData.append('threads', sparkConfig.threads.toString());
+      formData.append('driverMemory', sparkConfig.driverMemory);
 
       // This is the API call to your external processing server
       // The server should handle both Spark and Pandas processing
@@ -99,6 +101,7 @@ export const useBenchmark = () => {
               sparkResult: data.sparkResult,
               pandasResult: data.pandasResult,
               sparkJobInfo: data.sparkJobInfo,
+              sparkConfig: data.sparkConfig || sparkConfig,
             }
           : r
       ));
@@ -126,6 +129,7 @@ export const useBenchmark = () => {
               pandasExecutionTime: simulatedPandasTime,
               sparkThroughput: fileSizeMB / (simulatedSparkTime / 1000),
               pandasThroughput: fileSizeMB / (simulatedPandasTime / 1000),
+              sparkConfig,
             }
           : r
       ));

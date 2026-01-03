@@ -8,18 +8,19 @@ import { fileTypesData } from '@/data/fileTypes';
 import { useBenchmark } from '@/hooks/useBenchmark';
 import { FileType } from '@/types/benchmark';
 import { Zap, Server, Activity } from 'lucide-react';
-
 const Index = () => {
   const [selectedFileType, setSelectedFileType] = useState<FileType | null>(null);
-  const { results, processingStatus, isProcessing, submitBenchmark } = useBenchmark();
-
+  const {
+    results,
+    processingStatus,
+    isProcessing,
+    submitBenchmark
+  } = useBenchmark();
   const handleFileSelect = (fileType: FileType) => (file: File) => {
     setSelectedFileType(fileType);
     submitBenchmark(file, fileType);
   };
-
-  return (
-    <>
+  return <>
       <Helmet>
         <title>SparkBench - Healthcare Data Performance Benchmarking</title>
         <meta name="description" content="Compare Apache Spark and Pandas execution times for healthcare data processing. Benchmark FASTQ, JPEG, CSV, XLSX, and Parquet files." />
@@ -49,32 +50,29 @@ const Index = () => {
             <div className="flex flex-wrap justify-center gap-6 mb-8">
               <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border">
                 <Zap className="w-4 h-4 text-primary" />
-                <span className="text-sm text-foreground">Apache Spark 3.x</span>
+                <span className="text-sm text-foreground">Apache Spark 3.5.7
+              </span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border">
                 <span className="text-lg">🐼</span>
-                <span className="text-sm text-foreground">Pandas 2.x</span>
+                <span className="text-sm text-foreground">Pandas 2.3.3</span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border">
                 <Server className="w-4 h-4 text-accent" />
-                <span className="text-sm text-foreground">5 File Types</span>
+                <span className="text-sm text-foreground">Common File Types</span>
               </div>
             </div>
           </section>
 
           {/* Processing Status */}
-          {processingStatus && (
-            <section className="mb-8 animate-scale-in">
+          {processingStatus && <section className="mb-8 animate-scale-in">
               <ProcessingStatus status={processingStatus} />
-            </section>
-          )}
+            </section>}
 
           {/* Results Section */}
-          {results.length > 0 && (
-            <section className="mb-12 animate-slide-up">
+          {results.length > 0 && <section className="mb-12 animate-slide-up">
               <BenchmarkResults results={results} />
-            </section>
-          )}
+            </section>}
 
           {/* File Type Selection Grid */}
           <section>
@@ -86,19 +84,11 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {fileTypesData.map((fileType, index) => (
-                <div 
-                  key={fileType.id} 
-                  className="animate-slide-up"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <FileTypeCard
-                    fileType={fileType}
-                    onFileSelect={handleFileSelect(fileType.id)}
-                    isSelected={selectedFileType === fileType.id && isProcessing}
-                  />
-                </div>
-              ))}
+              {fileTypesData.map((fileType, index) => <div key={fileType.id} className="animate-slide-up" style={{
+              animationDelay: `${index * 100}ms`
+            }}>
+                  <FileTypeCard fileType={fileType} onFileSelect={handleFileSelect(fileType.id)} isSelected={selectedFileType === fileType.id && isProcessing} />
+                </div>)}
             </div>
           </section>
         </main>
@@ -112,8 +102,6 @@ const Index = () => {
           </div>
         </footer>
       </div>
-    </>
-  );
+    </>;
 };
-
 export default Index;

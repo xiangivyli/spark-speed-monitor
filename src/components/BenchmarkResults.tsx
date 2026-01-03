@@ -93,6 +93,20 @@ const BenchmarkResults = ({ results }: BenchmarkResultsProps) => {
                 <div className="flex items-center gap-2 flex-wrap justify-end">
                   {result.status === 'completed' && (
                     <>
+                      {/* Spark Config Badges */}
+                      {result.sparkConfig && (
+                        <>
+                          <div className="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-muted-foreground flex items-center gap-1">
+                            <Cpu className="w-3 h-3" />
+                            {result.sparkConfig.threads} threads
+                          </div>
+                          <div className="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-muted-foreground flex items-center gap-1">
+                            <Database className="w-3 h-3" />
+                            {result.sparkConfig.driverMemory}
+                          </div>
+                        </>
+                      )}
+                      
                       {/* Data Source Indicator */}
                       <div className={cn(
                         "px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1.5",

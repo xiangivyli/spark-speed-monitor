@@ -4,12 +4,17 @@ import Header from '@/components/Header';
 import FileTypeCard from '@/components/FileTypeCard';
 import BenchmarkResults from '@/components/BenchmarkResults';
 import ProcessingStatus from '@/components/ProcessingStatus';
+import SparkConfigPanel from '@/components/SparkConfigPanel';
 import { fileTypesData } from '@/data/fileTypes';
 import { useBenchmark } from '@/hooks/useBenchmark';
-import { FileType } from '@/types/benchmark';
+import { FileType, SparkConfig } from '@/types/benchmark';
 import { Zap, Server, Activity } from 'lucide-react';
 const Index = () => {
   const [selectedFileType, setSelectedFileType] = useState<FileType | null>(null);
+  const [sparkConfig, setSparkConfig] = useState<SparkConfig>({
+    threads: 6,
+    driverMemory: '4g',
+  });
   const {
     results,
     processingStatus,
@@ -18,7 +23,7 @@ const Index = () => {
   } = useBenchmark();
   const handleFileSelect = (fileType: FileType) => (file: File) => {
     setSelectedFileType(fileType);
-    submitBenchmark(file, fileType);
+    submitBenchmark(file, fileType, sparkConfig);
   };
   return <>
       <Helmet>
@@ -62,6 +67,15 @@ const Index = () => {
                 <span className="text-sm text-foreground">Common File Types</span>
               </div>
             </div>
+          </section>
+
+          {/* Spark Configuration */}
+          <section className="mb-8">
+            <SparkConfigPanel 
+              config={sparkConfig} 
+              onChange={setSparkConfig} 
+              disabled={isProcessing}
+            />
           </section>
 
           {/* Processing Status */}

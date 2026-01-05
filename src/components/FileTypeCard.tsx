@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { 
   Dna, 
-  Image, 
   Table, 
   FileSpreadsheet, 
   Database,
@@ -12,7 +11,11 @@ import {
   ChevronDown,
   ChevronUp,
   Copy,
-  Check
+  Check,
+  Layers,
+  Braces,
+  ScanLine,
+  Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,10 +27,13 @@ interface FileTypeCardProps {
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Dna,
-  Image,
   Table,
   FileSpreadsheet,
   Database,
+  Layers,
+  Braces,
+  ScanLine,
+  Activity,
 };
 
 const FileTypeCard = ({ fileType, onFileSelect, isSelected }: FileTypeCardProps) => {
@@ -64,7 +70,7 @@ const FileTypeCard = ({ fileType, onFileSelect, isSelected }: FileTypeCardProps)
               "p-3 rounded-xl bg-gradient-to-br",
               fileType.color
             )}>
-              <IconComponent className="w-6 h-6 text-primary-foreground" />
+              <IconComponent className="w-6 h-6 text-white" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-foreground">{fileType.name}</h3>

@@ -5,10 +5,12 @@ import FileTypeCard from '@/components/FileTypeCard';
 import BenchmarkResults from '@/components/BenchmarkResults';
 import ProcessingStatus from '@/components/ProcessingStatus';
 import SparkConfigPanel from '@/components/SparkConfigPanel';
-import { fileTypesData } from '@/data/fileTypes';
+import { getFileTypesByCategory } from '@/data/fileTypes';
 import { useBenchmark } from '@/hooks/useBenchmark';
 import { FileType, SparkConfig } from '@/types/benchmark';
 import { Zap, Server, Activity } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+
 const Index = () => {
   const [selectedFileType, setSelectedFileType] = useState<FileType | null>(null);
   const [sparkConfig, setSparkConfig] = useState<SparkConfig>({
@@ -21,14 +23,19 @@ const Index = () => {
     isProcessing,
     submitBenchmark
   } = useBenchmark();
+
   const handleFileSelect = (fileType: FileType) => (file: File) => {
     setSelectedFileType(fileType);
     submitBenchmark(file, fileType, sparkConfig);
   };
-  return <>
+
+  const categorizedFileTypes = getFileTypesByCategory();
+
+  return (
+    <>
       <Helmet>
         <title>SparkBench - Healthcare Data Performance Benchmarking</title>
-        <meta name="description" content="Compare Apache Spark and Pandas execution times for healthcare data processing. Benchmark FASTQ, JPEG, CSV, XLSX, and Parquet files." />
+        <meta name="description" content="Compare Apache Spark and Pandas execution times for healthcare data processing. Benchmark Parquet, Avro, CSV, XLSX, FHIR JSON, DICOM, FASTQ, and EDF files." />
       </Helmet>
 
       <div className="min-h-screen">
@@ -55,8 +62,7 @@ const Index = () => {
             <div className="flex flex-wrap justify-center gap-6 mb-8">
               <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border">
                 <Zap className="w-4 h-4 text-primary" />
-                <span className="text-sm text-foreground">Apache Spark 3.5.7
-              </span>
+                <span className="text-sm text-foreground">Apache Spark 3.5.7</span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border">
                 <span className="text-lg">🐼</span>
@@ -64,7 +70,7 @@ const Index = () => {
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border">
                 <Server className="w-4 h-4 text-accent" />
-                <span className="text-sm text-foreground">Common File Types</span>
+                <span className="text-sm text-foreground">8 Healthcare Formats</span>
               </div>
             </div>
           </section>
@@ -79,30 +85,57 @@ const Index = () => {
           </section>
 
           {/* Processing Status */}
-          {processingStatus && <section className="mb-8 animate-scale-in">
+          {processingStatus && (
+            <section className="mb-8 animate-scale-in">
               <ProcessingStatus status={processingStatus} />
-            </section>}
+            </section>
+          )}
 
           {/* Results Section */}
-          {results.length > 0 && <section className="mb-12 animate-slide-up">
+          {results.length > 0 && (
+            <section className="mb-12 animate-slide-up">
               <BenchmarkResults results={results} />
-            </section>}
+            </section>
+          )}
 
-          {/* File Type Selection Grid */}
+          {/* File Type Selection - Grouped by Category */}
           <section>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-2xl font-semibold text-foreground">Select File Type</h2>
                 <p className="text-muted-foreground">Choose a format and upload your file to benchmark</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {fileTypesData.map((fileType, index) => <div key={fileType.id} className="animate-slide-up" style={{
-              animationDelay: `${index * 100}ms`
-            }}>
-                  <FileTypeCard fileType={fileType} onFileSelect={handleFileSelect(fileType.id)} isSelected={selectedFileType === fileType.id && isProcessing} />
-                </div>)}
+            <div className="space-y-10">
+              {categorizedFileTypes.map((group, groupIndex) => (
+                <div key={group.category} className="animate-fade-in" style={{ animationDelay: `${groupIndex * 150}ms` }}>
+                  {/* Category Header */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <Badge variant="secondary" className="text-sm font-medium px-3 py-1">
+                      {group.category}
+                    </Badge>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+
+                  {/* File Type Cards Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {group.fileTypes.map((fileType, index) => (
+                      <div 
+                        key={fileType.id} 
+                        className="animate-slide-up" 
+                        style={{ animationDelay: `${(groupIndex * 150) + (index * 100)}ms` }}
+                      >
+                        <FileTypeCard 
+                          fileType={fileType} 
+                          onFileSelect={handleFileSelect(fileType.id)} 
+                          isSelected={selectedFileType === fileType.id && isProcessing} 
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
         </main>
@@ -116,6 +149,8 @@ const Index = () => {
           </div>
         </footer>
       </div>
-    </>;
+    </>
+  );
 };
+
 export default Index;

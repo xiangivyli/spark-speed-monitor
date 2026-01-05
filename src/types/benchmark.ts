@@ -20,6 +20,7 @@ export interface FileTypeMetadata {
   useCase: string;
   structure: string;
   sampleCode: string;
+  sampleIsMetadata?: boolean;
   icon: string;
   color: string;
 }

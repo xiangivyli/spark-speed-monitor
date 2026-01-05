@@ -12,6 +12,7 @@ export const fileTypesData: FileTypeMetadata[] = [
     structure: 'Columnar binary format with schema, row groups, and column chunks',
     icon: 'Database',
     color: 'from-orange-500 to-amber-600',
+    sampleIsMetadata: true,
     sampleCode: `{
   "schema": {
     "encounter_id": "INT64",
@@ -36,6 +37,7 @@ export const fileTypesData: FileTypeMetadata[] = [
     structure: 'Binary container with JSON schema header, followed by data blocks with sync markers',
     icon: 'Layers',
     color: 'from-sky-500 to-blue-600',
+    sampleIsMetadata: true,
     sampleCode: `{
   "type": "record",
   "name": "PatientEvent",
@@ -78,6 +80,7 @@ P005,2024-01-15,128,82,74,102,36.9`
     structure: 'ZIP-compressed XML format with worksheets, styles, shared strings, and metadata',
     icon: 'FileSpreadsheet',
     color: 'from-green-500 to-emerald-600',
+    sampleIsMetadata: true,
     sampleCode: `{
   "fileName": "patient_cohort_2024.xlsx",
   "sheets": [
@@ -126,6 +129,7 @@ P005,2024-01-15,128,82,74,102,36.9`
     structure: 'Binary format with metadata header (tags) followed by pixel data, supports multiple frames',
     icon: 'ScanLine',
     color: 'from-violet-500 to-purple-600',
+    sampleIsMetadata: true,
     sampleCode: `{
   "PatientName": "ANONYMOUS^PATIENT",
   "PatientID": "MRN-12345678",
@@ -171,6 +175,7 @@ IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII`
     structure: 'Header with patient/recording info and signal specifications, followed by data records with multiplexed samples',
     icon: 'Activity',
     color: 'from-rose-500 to-pink-600',
+    sampleIsMetadata: true,
     sampleCode: `{
   "version": "0",
   "patientInfo": "X F 01-JAN-1980 Patient_X",

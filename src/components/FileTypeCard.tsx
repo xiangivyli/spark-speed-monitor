@@ -108,7 +108,9 @@ const FileTypeCard = ({ fileType, onFileSelect, isSelected }: FileTypeCardProps)
             
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Sample</span>
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Sample {fileType.sampleIsMetadata && <span className="text-muted-foreground/70">(Metadata only)</span>}
+                </span>
                 <button
                   onClick={copyToClipboard}
                   className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"

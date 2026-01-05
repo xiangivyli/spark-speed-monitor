@@ -1,4 +1,10 @@
-export type FileType = 'FASTQ' | 'JPG' | 'CSV' | 'XLSX' | 'PARQUET';
+export type FileType = 'PARQUET' | 'AVRO' | 'CSV' | 'XLSX' | 'JSON' | 'DICOM' | 'FASTQ' | 'EDF';
+
+export type FileCategory = 
+  | 'Native / Optimised Formats'
+  | 'Standard Interoperability Formats'
+  | 'Semi-Structured'
+  | 'Domain-Specific';
 
 export interface SparkConfig {
   threads: number;
@@ -7,6 +13,7 @@ export interface SparkConfig {
 
 export interface FileTypeMetadata {
   id: FileType;
+  category: FileCategory;
   name: string;
   extension: string;
   description: string;

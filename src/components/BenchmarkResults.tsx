@@ -11,7 +11,8 @@ import {
   Server,
   Cpu,
   Layers,
-  Database
+  Database,
+  Split
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -198,6 +199,21 @@ const BenchmarkResults = ({ results }: BenchmarkResultsProps) => {
                       <div>
                         <span className="text-muted-foreground">Dimensions: </span>
                         <span className="font-mono text-foreground">{result.sparkResult.width}×{result.sparkResult.height}</span>
+                      </div>
+                    )}
+                    {result.sparkResult.partitions !== undefined && (
+                      <div className="flex items-center gap-1">
+                        <Split className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-muted-foreground">Partitions: </span>
+                        <span className={cn(
+                          "font-mono",
+                          result.sparkResult.partitions > 1 ? "text-success" : "text-warning"
+                        )}>
+                          {result.sparkResult.partitions}
+                        </span>
+                        {result.sparkResult.partitions === 1 && (
+                          <span className="text-warning text-[10px]">(single-core)</span>
+                        )}
                       </div>
                     )}
                   </div>

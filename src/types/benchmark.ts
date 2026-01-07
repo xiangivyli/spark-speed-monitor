@@ -42,6 +42,7 @@ export interface ProcessingResult {
   height?: number;
   mode?: string;
   schema?: string[];
+  partitions?: number;
 }
 
 export interface BenchmarkResult {

@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { FileTypeMetadata } from '@/types/benchmark';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { 
   Dna, 
   Table, 
@@ -15,13 +22,15 @@ import {
   Layers,
   Braces,
   ScanLine,
-  Activity
+  Activity,
+  Shuffle,
+  Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface FileTypeCardProps {
   fileType: FileTypeMetadata;
-  onFileSelect: (file: File) => void;
+  onFileSelect: (file: File, options?: { forceRepartition?: boolean }) => void;
   isSelected: boolean;
 }
 
@@ -39,13 +48,15 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 const FileTypeCard = ({ fileType, onFileSelect, isSelected }: FileTypeCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [forceRepartition, setForceRepartition] = useState(false);
   
   const IconComponent = iconMap[fileType.icon] || Database;
+  const isCsv = fileType.id === 'CSV';
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      onFileSelect(file);
+      onFileSelect(file, isCsv ? { forceRepartition } : undefined);
     }
   };
 
@@ -123,6 +134,30 @@ const FileTypeCard = ({ fileType, onFileSelect, isSelected }: FileTypeCardProps)
                 {fileType.sampleCode}
               </pre>
             </div>
+          </div>
+        )}
+
+        {/* CSV-specific: Force Repartition Option */}
+        {isCsv && (
+          <div className="flex items-center justify-between py-3 px-3 mb-4 rounded-lg bg-secondary/30 border border-border">
+            <div className="flex items-center gap-2">
+              <Shuffle className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">Force Repartition</span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs">
+                    <p>Redistributes CSV data across all configured Spark cores for better parallelism. Useful for large files that load into a single partition.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <Switch 
+              checked={forceRepartition} 
+              onCheckedChange={setForceRepartition}
+            />
           </div>
         )}
 

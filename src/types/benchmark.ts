@@ -6,9 +6,14 @@ export type FileCategory =
   | 'Semi-Structured'
   | 'Domain-Specific';
 
+export interface CsvOptions {
+  forceRepartition: boolean;
+}
+
 export interface SparkConfig {
   threads: number;
   driverMemory: string;
+  csvOptions?: CsvOptions;
 }
 
 export interface FileTypeMetadata {

@@ -24,9 +24,15 @@ const Index = () => {
     submitBenchmark
   } = useBenchmark();
 
-  const handleFileSelect = (fileType: FileType) => (file: File) => {
+  const handleFileSelect = (fileType: FileType) => (file: File, options?: { forceRepartition?: boolean }) => {
     setSelectedFileType(fileType);
-    submitBenchmark(file, fileType, sparkConfig);
+    const configWithOptions: SparkConfig = {
+      ...sparkConfig,
+      csvOptions: options?.forceRepartition !== undefined 
+        ? { forceRepartition: options.forceRepartition } 
+        : undefined,
+    };
+    submitBenchmark(file, fileType, configWithOptions);
   };
 
   const categorizedFileTypes = getFileTypesByCategory();

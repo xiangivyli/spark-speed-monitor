@@ -46,6 +46,11 @@ export const useBenchmark = () => {
       formData.append('fileType', fileType);
       formData.append('threads', sparkConfig.threads.toString());
       formData.append('driverMemory', sparkConfig.driverMemory);
+      
+      // Add CSV-specific options
+      if (fileType === 'CSV' && sparkConfig.csvOptions?.forceRepartition) {
+        formData.append('forceRepartition', 'true');
+      }
 
       // This is the API call to your external processing server
       // The server should handle both Spark and Pandas processing

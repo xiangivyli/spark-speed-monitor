@@ -24,12 +24,12 @@ const Index = () => {
     submitBenchmark
   } = useBenchmark();
 
-  const handleFileSelect = (fileType: FileType) => (file: File, options?: { repartitionCount?: number | null }) => {
+  const handleFileSelect = (fileType: FileType) => (file: File, options?: { targetPartitionSizeMb?: number | null }) => {
     setSelectedFileType(fileType);
     const configWithOptions: SparkConfig = {
       ...sparkConfig,
-      csvOptions: options?.repartitionCount !== undefined && options.repartitionCount !== null
-        ? { repartitionCount: options.repartitionCount }
+      csvOptions: options?.targetPartitionSizeMb !== undefined && options.targetPartitionSizeMb !== null
+        ? { targetPartitionSizeMb: options.targetPartitionSizeMb }
         : undefined,
     };
     submitBenchmark(file, fileType, configWithOptions);
@@ -136,7 +136,6 @@ const Index = () => {
                           fileType={fileType} 
                           onFileSelect={handleFileSelect(fileType.id)} 
                           isSelected={selectedFileType === fileType.id && isProcessing}
-                          defaultPartitions={sparkConfig.threads}
                         />
                       </div>
                     ))}

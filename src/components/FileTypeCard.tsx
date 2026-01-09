@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FileTypeMetadata } from '@/types/benchmark';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -31,9 +31,8 @@ import { cn } from '@/lib/utils';
 
 interface FileTypeCardProps {
   fileType: FileTypeMetadata;
-  onFileSelect: (file: File, options?: { repartitionCount?: number | null }) => void;
+  onFileSelect: (file: File, options?: { targetPartitionSizeMb?: number | null }) => void;
   isSelected: boolean;
-  defaultPartitions?: number;
 }
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -47,33 +46,26 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity,
 };
 
-const FileTypeCard = ({ fileType, onFileSelect, isSelected, defaultPartitions = 6 }: FileTypeCardProps) => {
+const FileTypeCard = ({ fileType, onFileSelect, isSelected }: FileTypeCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [repartitionEnabled, setRepartitionEnabled] = useState(false);
-  const [partitionCount, setPartitionCount] = useState<number>(defaultPartitions);
+  const [partitionSizeMb, setPartitionSizeMb] = useState<number>(128);
   
   const IconComponent = iconMap[fileType.icon] || Database;
   const isCsv = fileType.id === 'CSV';
 
-  // Sync partition count with default when it changes (and user hasn't enabled repartition yet)
-  useEffect(() => {
-    if (!repartitionEnabled) {
-      setPartitionCount(defaultPartitions);
-    }
-  }, [defaultPartitions, repartitionEnabled]);
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      onFileSelect(file, isCsv && repartitionEnabled ? { repartitionCount: partitionCount } : undefined);
+      onFileSelect(file, isCsv && repartitionEnabled ? { targetPartitionSizeMb: partitionSizeMb } : undefined);
     }
   };
 
-  const handlePartitionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePartitionSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value >= 1 && value <= 200) {
-      setPartitionCount(value);
+    if (!isNaN(value) && value >= 1 && value <= 1024) {
+      setPartitionSizeMb(value);
     }
   };
 
@@ -180,22 +172,25 @@ const FileTypeCard = ({ fileType, onFileSelect, isSelected, defaultPartitions = 
             
             {repartitionEnabled && (
               <div className="flex items-center gap-3 pt-2 border-t border-border/50">
-                <label className="text-sm text-muted-foreground">Partitions:</label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={200}
-                  value={partitionCount}
-                  onChange={handlePartitionChange}
-                  className="w-20 h-8 text-center"
-                />
+                <label className="text-sm text-muted-foreground">Partition Size:</label>
+                <div className="flex items-center gap-1">
+                  <Input
+                    type="number"
+                    min={1}
+                    max={1024}
+                    value={partitionSizeMb}
+                    onChange={handlePartitionSizeChange}
+                    className="w-20 h-8 text-center"
+                  />
+                  <span className="text-sm text-muted-foreground">MB</span>
+                </div>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
-                      <p>Number of partitions to create. Default matches thread count ({defaultPartitions}). Higher values increase parallelism but add overhead.</p>
+                      <p>Target size for each partition in MB. Default is 128 MB. Smaller values create more partitions for better parallelism.</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

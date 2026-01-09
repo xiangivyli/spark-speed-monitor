@@ -48,8 +48,8 @@ export const useBenchmark = () => {
       formData.append('driverMemory', sparkConfig.driverMemory);
       
       // Add CSV-specific options
-      if (fileType === 'CSV' && sparkConfig.csvOptions?.repartitionCount) {
-        formData.append('repartitionCount', sparkConfig.csvOptions.repartitionCount.toString());
+      if (fileType === 'CSV' && sparkConfig.csvOptions?.targetPartitionSizeMb) {
+        formData.append('target_partition_size_mb', sparkConfig.csvOptions.targetPartitionSizeMb.toString());
       }
 
       // This is the API call to your external processing server

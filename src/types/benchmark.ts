@@ -7,7 +7,7 @@ export type FileCategory =
   | 'Domain-Specific';
 
 export interface CsvOptions {
-  forceRepartition: boolean;
+  repartitionCount: number | null;
 }
 
 export interface SparkConfig {

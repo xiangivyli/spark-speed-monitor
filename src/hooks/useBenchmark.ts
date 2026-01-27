@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { BenchmarkResult, FileType, ProcessingStatus, SparkConfig } from '@/types/benchmark';
 import { useToast } from '@/hooks/use-toast';
 
@@ -10,9 +10,37 @@ export const useBenchmark = () => {
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const pollQueueStatus = useCallback(async (taskId: string): Promise<{ status: string; position?: number; total?: number }> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/queue-status/${taskId}`);
+      if (!response.ok) {
+        throw new Error(`Queue status check failed: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error polling queue status:', error);
+      throw error;
+    }
+  }, []);
+
+  const fetchResult = useCallback(async (taskId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/benchmark/result/${taskId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch result: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching result:', error);
+      throw error;
+    }
+  }, []);
 
   const submitBenchmark = useCallback(async (file: File, fileType: FileType, sparkConfig: SparkConfig) => {
     setIsProcessing(true);
+    abortControllerRef.current = new AbortController();
     
     const benchmarkId = `benchmark-${Date.now()}`;
     
@@ -34,11 +62,11 @@ export const useBenchmark = () => {
     setResults(prev => [pendingResult, ...prev]);
 
     try {
-      // Stage 1: Upload file
+      // Stage 1: Submit to queue
       setProcessingStatus({
-        stage: 'uploading',
-        progress: 20,
-        message: 'Uploading file to processing server...'
+        stage: 'queued',
+        progress: 5,
+        message: 'Joining queue...',
       });
 
       const formData = new FormData();
@@ -52,44 +80,86 @@ export const useBenchmark = () => {
         formData.append('target_partition_size_mb', sparkConfig.csvOptions.targetPartitionSizeMb.toString());
       }
 
-      // This is the API call to your external processing server
-      // The server should handle both Spark and Pandas processing
-      const response = await fetch(`${API_BASE_URL}/benchmark`, {
+      // Submit and get task_id + initial position
+      const submitResponse = await fetch(`${API_BASE_URL}/benchmark/submit`, {
         method: 'POST',
         body: formData,
+        signal: abortControllerRef.current.signal,
       });
 
-      if (!response.ok) {
-        throw new Error(`Server responded with status ${response.status}`);
+      if (!submitResponse.ok) {
+        throw new Error(`Server responded with status ${submitResponse.status}`);
       }
 
-      // Stage 2: Processing with Spark
+      const { task_id, position, total } = await submitResponse.json();
+
+      // Update with initial queue position
       setProcessingStatus({
-        stage: 'processing_spark',
-        progress: 50,
-        message: 'Running Apache Spark processing...'
+        stage: 'queued',
+        progress: 5,
+        message: `Position ${position} of ${total} in queue`,
+        queuePosition: position,
+        queueTotal: total,
       });
 
-      // In a real implementation, you might use WebSockets or SSE 
-      // to get real-time updates from the server
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Poll for status updates
+      let completed = false;
+      let lastStage: ProcessingStatus['stage'] = 'queued';
+      
+      while (!completed) {
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Poll every 1.5s
+        
+        const status = await pollQueueStatus(task_id);
+        
+        if (status.status === 'queued') {
+          setProcessingStatus({
+            stage: 'queued',
+            progress: 5,
+            message: `Position ${status.position} of ${status.total} in queue`,
+            queuePosition: status.position,
+            queueTotal: status.total,
+          });
+          lastStage = 'queued';
+        } else if (status.status === 'processing') {
+          // Show processing stages
+          if (lastStage === 'queued') {
+            setProcessingStatus({
+              stage: 'uploading',
+              progress: 20,
+              message: 'Your turn! Preparing file...',
+            });
+            lastStage = 'uploading';
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+          
+          setProcessingStatus({
+            stage: 'processing_spark',
+            progress: 50,
+            message: 'Running Apache Spark processing...',
+          });
+          lastStage = 'processing_spark';
+        } else if (status.status === 'processing_pandas') {
+          setProcessingStatus({
+            stage: 'processing_pandas',
+            progress: 75,
+            message: 'Running Pandas processing (control group)...',
+          });
+          lastStage = 'processing_pandas';
+        } else if (status.status === 'completed') {
+          completed = true;
+        } else if (status.status === 'error') {
+          throw new Error('Processing failed on server');
+        }
+      }
 
-      // Stage 3: Processing with Pandas
-      setProcessingStatus({
-        stage: 'processing_pandas',
-        progress: 75,
-        message: 'Running Pandas processing (control group)...'
-      });
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const data = await response.json();
+      // Fetch final result
+      const data = await fetchResult(task_id);
 
       // Stage 4: Completed
       setProcessingStatus({
         stage: 'completed',
         progress: 100,
-        message: 'Benchmark completed!'
+        message: 'Benchmark completed!',
       });
 
       // Update result with actual data from server
@@ -142,7 +212,7 @@ export const useBenchmark = () => {
       setProcessingStatus({
         stage: 'completed',
         progress: 100,
-        message: 'Demo mode: Using simulated results'
+        message: 'Demo mode: Using simulated results',
       });
 
       toast({
@@ -152,9 +222,10 @@ export const useBenchmark = () => {
       });
     } finally {
       setIsProcessing(false);
+      abortControllerRef.current = null;
       setTimeout(() => setProcessingStatus(null), 3000);
     }
-  }, [toast]);
+  }, [toast, pollQueueStatus, fetchResult]);
 
   return {
     results,

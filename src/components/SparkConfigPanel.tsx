@@ -22,7 +22,7 @@ interface SparkConfigPanelProps {
   disabled?: boolean;
 }
 
-const memoryOptions = ['1g', '2g', '4g', '8g', '12g', '16g', '20g', '24g'];
+const memoryOptions = ['1g', '2g', '4g', '8g', '12g', '16g'];
 
 const SparkConfigPanel = ({ config, onChange, disabled }: SparkConfigPanelProps) => {
   return (

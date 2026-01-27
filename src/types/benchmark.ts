@@ -75,7 +75,9 @@ export interface BenchmarkRequest {
 }
 
 export interface ProcessingStatus {
-  stage: 'uploading' | 'processing_spark' | 'processing_pandas' | 'completed' | 'error';
+  stage: 'queued' | 'uploading' | 'processing_spark' | 'processing_pandas' | 'completed' | 'error';
   progress: number;
   message: string;
+  queuePosition?: number;
+  queueTotal?: number;
 }

@@ -6,7 +6,8 @@ import {
   Zap, 
   CheckCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +16,7 @@ interface ProcessingStatusProps {
 }
 
 const stageIcons = {
+  queued: Users,
   uploading: Upload,
   processing_spark: Zap,
   processing_pandas: () => <span className="text-lg">🐼</span>,
@@ -64,25 +66,41 @@ const ProcessingStatus = ({ status }: ProcessingStatusProps) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          {['uploading', 'processing_spark', 'processing_pandas', 'completed'].map((stage, index) => (
-            <div key={stage} className="flex items-center gap-2">
-              <div className={cn(
-                "w-2 h-2 rounded-full transition-all duration-300",
-                status.stage === stage && "bg-primary animate-pulse-soft",
-                ['completed', 'error'].includes(status.stage) || 
-                  ['uploading', 'processing_spark', 'processing_pandas', 'completed'].indexOf(status.stage) > index
-                  ? "bg-success"
-                  : "bg-muted"
-              )} />
-              <span className={cn(
-                "text-xs capitalize transition-colors",
-                status.stage === stage ? "text-foreground font-medium" : "text-muted-foreground"
-              )}>
-                {stage.replace('_', ' ')}
+        {status.stage === 'queued' && status.queuePosition !== undefined && (
+          <div className="mb-4 p-3 bg-primary/5 rounded-lg border border-primary/20">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Queue Position</span>
+              <span className="text-lg font-bold text-primary">
+                {status.queuePosition} of {status.queueTotal || status.queuePosition}
               </span>
             </div>
-          ))}
+          </div>
+        )}
+
+        <div className="flex items-center gap-6 flex-wrap">
+          {['queued', 'uploading', 'processing_spark', 'processing_pandas', 'completed'].map((stage, index) => {
+            const stages = ['queued', 'uploading', 'processing_spark', 'processing_pandas', 'completed'];
+            const currentIndex = stages.indexOf(status.stage);
+            const isCompleted = currentIndex > index || status.stage === 'completed';
+            const isCurrent = status.stage === stage;
+            
+            return (
+              <div key={stage} className="flex items-center gap-2">
+                <div className={cn(
+                  "w-2 h-2 rounded-full transition-all duration-300",
+                  isCurrent && "bg-primary animate-pulse-soft",
+                  isCompleted && !isCurrent && "bg-success",
+                  !isCompleted && !isCurrent && "bg-muted"
+                )} />
+                <span className={cn(
+                  "text-xs capitalize transition-colors",
+                  isCurrent ? "text-foreground font-medium" : "text-muted-foreground"
+                )}>
+                  {stage === 'queued' ? 'Queue' : stage.replace('_', ' ')}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </Card>
